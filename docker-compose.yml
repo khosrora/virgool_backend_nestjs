@@ -1,0 +1,16 @@
+## docker compose up -d postgres
+version: '3.9'
+
+services:
+  postgres:
+    container_name: postgres_test
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=jobber
+      - POSTGRES_PASSWORD=api
+      - POSTGRES_DB=jobber_reviews
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./docker-volumes/postgres:/var/lib/postgresql
