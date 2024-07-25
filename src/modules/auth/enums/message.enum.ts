@@ -9,8 +9,18 @@ export enum AuthMessage {
   tryAgain = 'دوباره تلاش کنید',
   loginAgain = 'مجدد وارد حساب کاربری خود شوید',
 }
-export enum NotFoundMessage {}
+export enum NotFoundMessage {
+  notFound = 'موردی یافت نشد',
+}
 export enum ValidationMessage {}
+
 export enum PublicMessage {
-  login = 'ورود موفقیت آمیز بود'
+  login = 'ورود موفقیت آمیز بود',
+  created = 'با موفقیت ایجاد شد',
+  deleted = 'با موفقیت حذف شد',
+  updated = 'با موفقیت ویرایش شد',
+}
+
+export enum ConfilictMessage {
+  categoryTitle = 'عنوان دسته بندی تکراری می باشد',
 }
