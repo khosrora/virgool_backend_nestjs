@@ -25,6 +25,16 @@ export class TokenService {
   verificationOtpToken(token: string): AccessTokenPayload {
     try {
       return this.jwtService.verify(token, {
+        secret: process.env.OTP_TOKEN_SECRET,
+      });
+    } catch (error) {
+      throw new UnauthorizedException();
+    }
+  }
+
+  verificationAccessToken(token: string): AccessTokenPayload {
+    try {
+      return this.jwtService.verify(token, {
         secret: process.env.ACCESS_TOKEN_SECRET,
       });
     } catch (error) {

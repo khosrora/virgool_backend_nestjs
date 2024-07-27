@@ -94,6 +94,7 @@ export class AuthService {
     const now = new Date();
     if (!token) throw new UnauthorizedException(AuthMessage.expiredCode);
     const { userId } = this.tokenService.verificationOtpToken(token);
+
     const otp = await this.otpRepository.findOneBy({ userId });
     if (!otp) throw new UnauthorizedException(AuthMessage.tryAgain);
     if (otp.expiresIn < now)
@@ -173,8 +174,16 @@ export class AuthService {
     });
   }
 
-  async validateAccessToken(token: string) {
+  async validateOtpToken(token: string) {
     const { userId } = this.tokenService.verificationOtpToken(token);
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) throw new UnauthorizedException(AuthMessage.tryAgain);
+    return user;
+  }
+
+  async validateAccessToken(token: string) {
+    const { userId } = this.tokenService.verificationAccessToken(token);
 
     const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) throw new UnauthorizedException(AuthMessage.tryAgain);

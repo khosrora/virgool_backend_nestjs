@@ -12,7 +12,9 @@ export enum AuthMessage {
 export enum NotFoundMessage {
   notFound = 'موردی یافت نشد',
 }
-export enum ValidationMessage {}
+export enum ValidationMessage {
+  InvalidImageFormat = 'فرمت فایل معتبر نمی باشد',
+}
 
 export enum PublicMessage {
   login = 'ورود موفقیت آمیز بود',

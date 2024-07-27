@@ -2,9 +2,17 @@ import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { EntityName } from 'src/common/enums/entity.enum';
 import { BaseEntity } from 'src/common/abstracts/base.entity';
 import { OtpEntity } from './otp.entities';
+import { ProfileEntity } from './profile.entities';
+import { profile } from 'console';
 
 @Entity(EntityName.User)
 export class UserEntity extends BaseEntity {
+  @Column({ nullable: true  })
+  profileId: number;
+  @OneToOne(() => ProfileEntity, (profile) => profile.user, { nullable: true })
+  @JoinColumn()
+  profile: ProfileEntity;
+
   @Column({ unique: true, nullable: true })
   username: string;
   @Column({ unique: true, nullable: true })
