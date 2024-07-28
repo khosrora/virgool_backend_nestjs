@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeormConfig } from './config/typeorm.config';
 import { AuthModule } from './modules/auth/auth.module';
+import { BlogModule } from './modules/blog/blog.module';
 import { CategoryModule } from './modules/category/category.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -19,6 +20,7 @@ import { UserModule } from './modules/user/user.module';
     AuthModule,
     UserModule,
     CategoryModule,
+    BlogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

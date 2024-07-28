@@ -1,31 +1,23 @@
 import {
   Body,
   Controller,
-  Get,
-  ParseFilePipe,
-  Patch,
+  Get, Patch,
   Post,
   Put,
-  Res,
-  UploadedFiles,
-  UseGuards,
-  UseInterceptors,
+  Res, UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import {
-  FileFieldsInterceptor,
-  FileInterceptor,
+  FileFieldsInterceptor
 } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { diskStorage } from 'multer';
 import { UploadFileOptional } from 'src/common/decorator/UploadFile.decorator';
 import { CookieKeys } from 'src/common/enums/cookie.enum';
 import { swaggerConsumes } from 'src/common/enums/swagger-consume.enum';
 import { CookieOptionToken } from 'src/common/utils/cookie.utils';
 import {
-  multerDestination,
-  multerFileName,
-  multerStorage,
+  multerStorage
 } from 'src/common/utils/multer.utils';
 import { PublicMessage } from '../auth/enums/message.enum';
 import { AuthGuard } from '../auth/guards/auth.guards';
@@ -34,7 +26,7 @@ import {
   ChangePhoneDto,
   ChangeUsernameDto,
   ProfileDto,
-  VerifyCodeDto,
+  VerifyCodeDto
 } from './dto/profile.dto';
 import { ProfileImages } from './types/files';
 import { UserService } from './user.service';
