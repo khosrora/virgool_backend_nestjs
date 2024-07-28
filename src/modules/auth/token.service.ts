@@ -58,7 +58,7 @@ export class TokenService {
     }
   }
 
-  verifyPhoneToken(token: string): AccessTokenPayload {
+  verifyPhoneToken(token: string): PhoneTokenPayload {
     try {
       return this.jwtService.verify(token, {
         secret: process.env.PHONE_TOKEN_SECRET,

@@ -29,7 +29,13 @@ import {
 } from 'src/common/utils/multer.utils';
 import { PublicMessage } from '../auth/enums/message.enum';
 import { AuthGuard } from '../auth/guards/auth.guards';
-import { ChangeEmailDto, ProfileDto, VerifyCodeDto } from './dto/profile.dto';
+import {
+  ChangeEmailDto,
+  ChangePhoneDto,
+  ChangeUsernameDto,
+  ProfileDto,
+  VerifyCodeDto,
+} from './dto/profile.dto';
 import { ProfileImages } from './types/files';
 import { UserService } from './user.service';
 
@@ -67,7 +73,7 @@ export class UserController {
   profile() {
     return this.userService.profile();
   }
-  
+
   @Patch('/change-email')
   @ApiBearerAuth('Authorization')
   @ApiConsumes(swaggerConsumes.urlEncoded)
@@ -93,5 +99,40 @@ export class UserController {
   @UseGuards(AuthGuard)
   verifyEmail(@Body() otpDto: VerifyCodeDto) {
     return this.userService.verifyEmail(otpDto.code);
+  }
+
+  @Patch('/change-phone')
+  @ApiBearerAuth('Authorization')
+  @ApiConsumes(swaggerConsumes.urlEncoded)
+  @UseGuards(AuthGuard)
+  async changePhone(
+    @Body() changePhoneDto: ChangePhoneDto,
+    @Res() res: Response,
+  ) {
+    const { code, message, token } = await this.userService.changePhone(
+      changePhoneDto.phone,
+    );
+    if (message) return res.json({ message });
+    res.cookie(CookieKeys.PHONE_OTP, token, CookieOptionToken());
+    res.json({
+      code,
+      message: PublicMessage.updated,
+    });
+  }
+
+  @Post('/verify-phone-otp')
+  @ApiBearerAuth('Authorization')
+  @ApiConsumes(swaggerConsumes.urlEncoded)
+  @UseGuards(AuthGuard)
+  verifyPhone(@Body() otpDto: VerifyCodeDto) {
+    return this.userService.verifyPhone(otpDto.code);
+  }
+  
+  @Patch('change-username')
+  @ApiBearerAuth('Authorization')
+  @ApiConsumes(swaggerConsumes.urlEncoded)
+  @UseGuards(AuthGuard)
+  changeUsername(@Body() changeUsernameDto: ChangeUsernameDto) {
+    return this.userService.changeUsername(changeUsernameDto.username)
   }
 }

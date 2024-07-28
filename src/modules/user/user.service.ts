@@ -133,14 +133,55 @@ export class UserService {
     const otp = await this.checkOtp(userId, code);
     if (otp.method !== AuthMethod.Email)
       throw new BadRequestException(BadRequestMessage.invalidEmail);
-    const access_token = this.tokenService.createAccessToken({ userId });
     this.userRepositry.update(
       { id: userId },
       { email, verify_email: true, new_email: null },
     );
     return {
       message: PublicMessage.updated,
-      access_token,
+    };
+  }
+
+  async changePhone(phone: string) {
+    const { id } = this.request.user;
+    const user = await this.userRepositry.findOneBy({ phone });
+    if (user && user.id !== id) {
+      throw new ConflictException(ConfilictMessage.phone);
+    } else if (user && user.id === id) {
+      return {
+        message: PublicMessage.updated,
+      };
+    }
+    await this.userRepositry.update(
+      { id },
+      {
+        new_phone: phone,
+      },
+    );
+    const otp = await this.authServise.saveOtp(id, AuthMethod.Phone);
+    const token = this.tokenService.createPhoneToken({ phone });
+    return {
+      code: otp.code,
+      token,
+    };
+  }
+
+  async verifyPhone(code: string) {
+    const { id: userId, new_phone } = this.request.user;
+    const token = this.request.cookies[CookieKeys.PHONE_OTP];
+    if (!token) throw new BadRequestException(AuthMessage.expiredCode);
+    const { phone } = this.tokenService.verifyPhoneToken(token);
+    if (phone !== new_phone)
+      throw new BadRequestException(BadRequestMessage.invalidPhone);
+    const otp = await this.checkOtp(userId, code);
+    if (otp.method !== AuthMethod.Phone)
+      throw new BadRequestException(BadRequestMessage.invalidPhone);
+    this.userRepositry.update(
+      { id: userId },
+      { phone, verify_phone: true, new_phone: null },
+    );
+    return {
+      message: PublicMessage.updated,
     };
   }
 
@@ -153,5 +194,26 @@ export class UserService {
     if (otp.code !== code)
       throw new BadRequestException(AuthMessage.loginAgain);
     return otp;
+  }
+
+  async changeUsername(username: string) {
+    const { id } = this.request.user;
+    const user = await this.userRepositry.findOneBy({ username });
+    if (user && user.id !== id) {
+      throw new ConflictException(ConfilictMessage.username);
+    } else if (user && user.id === id) {
+      return {
+        message: PublicMessage.updated,
+      };
+    }
+    await this.userRepositry.update(
+      { id },
+      {
+        username: username,
+      },
+    );
+    return {
+      message: PublicMessage.updated,
+    };
   }
 }
