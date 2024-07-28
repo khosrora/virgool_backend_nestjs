@@ -1,6 +1,8 @@
 export enum BadRequestMessage {
   InValidLoginData = 'اطلاعات ارسال شده برای احراز هویت صحیح نمی باشد',
   InValidRegisterData = 'اطلاعات ارسال شده برای ثبت نام صحیح نمی باشد',
+  someWrong = 'خطایی پیش آمده است' , 
+  invalidEmail = 'پست الکترونیک وارد شده صحیح نمی باشد'
 }
 export enum AuthMessage {
   notFoundAccount = 'حساب کاربری پیدا نشد',
@@ -25,4 +27,5 @@ export enum PublicMessage {
 
 export enum ConfilictMessage {
   categoryTitle = 'عنوان دسته بندی تکراری می باشد',
+  email = 'پست الکترونیک خود را مجدد بررسی کنید',
 }

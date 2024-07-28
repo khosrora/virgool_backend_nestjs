@@ -3,8 +3,10 @@ import {
   Controller,
   Get,
   ParseFilePipe,
+  Patch,
   Post,
   Put,
+  Res,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -14,16 +16,20 @@ import {
   FileInterceptor,
 } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { diskStorage } from 'multer';
 import { UploadFileOptional } from 'src/common/decorator/UploadFile.decorator';
+import { CookieKeys } from 'src/common/enums/cookie.enum';
 import { swaggerConsumes } from 'src/common/enums/swagger-consume.enum';
+import { CookieOptionToken } from 'src/common/utils/cookie.utils';
 import {
   multerDestination,
   multerFileName,
   multerStorage,
 } from 'src/common/utils/multer.utils';
+import { PublicMessage } from '../auth/enums/message.enum';
 import { AuthGuard } from '../auth/guards/auth.guards';
-import { ProfileDto } from './dto/profile.dto';
+import { ChangeEmailDto, ProfileDto, VerifyCodeDto } from './dto/profile.dto';
 import { ProfileImages } from './types/files';
 import { UserService } from './user.service';
 
@@ -60,5 +66,32 @@ export class UserController {
   @UseGuards(AuthGuard)
   profile() {
     return this.userService.profile();
+  }
+  
+  @Patch('/change-email')
+  @ApiBearerAuth('Authorization')
+  @ApiConsumes(swaggerConsumes.urlEncoded)
+  @UseGuards(AuthGuard)
+  async changeEmail(
+    @Body() changeEmailDto: ChangeEmailDto,
+    @Res() res: Response,
+  ) {
+    const { code, message, token } = await this.userService.changeEmail(
+      changeEmailDto.email,
+    );
+    if (message) return res.json({ message });
+    res.cookie(CookieKeys.EMAIL_OTP, token, CookieOptionToken());
+    res.json({
+      code,
+      message: PublicMessage.updated,
+    });
+  }
+
+  @Post('/verify-email-otp')
+  @ApiBearerAuth('Authorization')
+  @ApiConsumes(swaggerConsumes.urlEncoded)
+  @UseGuards(AuthGuard)
+  verifyEmail(@Body() otpDto: VerifyCodeDto) {
+    return this.userService.verifyEmail(otpDto.code);
   }
 }

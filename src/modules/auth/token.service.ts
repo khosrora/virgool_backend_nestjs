@@ -1,6 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AccessTokenPayload, CookiePayload } from './types/payload.types';
+import { BadRequestMessage } from './enums/message.enum';
+import {
+  AccessTokenPayload,
+  CookiePayload,
+  EmailTokenPayload,
+  PhoneTokenPayload,
+} from './types/payload.types';
 
 @Injectable()
 export class TokenService {
@@ -20,6 +30,42 @@ export class TokenService {
       expiresIn: '1y',
     });
     return token;
+  }
+
+  createEmailToken(payload: EmailTokenPayload) {
+    const token = this.jwtService.sign(payload, {
+      secret: process.env.EMAIL_TOKEN_SECRET,
+      expiresIn: 60 * 2,
+    });
+    return token;
+  }
+
+  createPhoneToken(payload: PhoneTokenPayload) {
+    const token = this.jwtService.sign(payload, {
+      secret: process.env.PHONE_TOKEN_SECRET,
+      expiresIn: 60 * 2,
+    });
+    return token;
+  }
+
+  verifyEmailToken(token: string): EmailTokenPayload {
+    try {
+      return this.jwtService.verify(token, {
+        secret: process.env.EMAIL_TOKEN_SECRET,
+      });
+    } catch (error) {
+      throw new BadRequestException(BadRequestMessage.someWrong);
+    }
+  }
+
+  verifyPhoneToken(token: string): AccessTokenPayload {
+    try {
+      return this.jwtService.verify(token, {
+        secret: process.env.PHONE_TOKEN_SECRET,
+      });
+    } catch (error) {
+      throw new BadRequestException(BadRequestMessage.someWrong);
+    }
   }
 
   verificationOtpToken(token: string): AccessTokenPayload {

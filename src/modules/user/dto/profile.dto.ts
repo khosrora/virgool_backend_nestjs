@@ -1,5 +1,12 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, Length } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsEnum,
+  IsMobilePhone,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 import { Gender } from '../enum/gender.enum';
 
 export class ProfileDto {
@@ -27,4 +34,23 @@ export class ProfileDto {
   @IsOptional()
   @ApiPropertyOptional({ nullable: true })
   linkdin_profile: string;
+}
+
+export class ChangeEmailDto {
+  @ApiProperty()
+  @IsEmail()
+  email: string;
+}
+
+export class VerifyCodeDto {
+  @ApiProperty()
+  @IsString()
+  @Length(4, 5)
+  code: string;
+}
+
+export class ChangePhoneDto {
+  @ApiProperty()
+  @IsMobilePhone('fa-IR')
+  phone: string;
 }
