@@ -37,6 +37,11 @@ export class CategoryService {
     };
   }
 
+  async insertByTitle(title: string) {
+    const category = this.categoryRepository.create({ title });
+    return await this.categoryRepository.save(category);
+  }
+
   async findAll(pagintaionDto: PaginationDto) {
     const { limit, page, skip } = paginationSolver(pagintaionDto);
     const [categories, count] = await this.categoryRepository.findAndCount({
@@ -54,6 +59,10 @@ export class CategoryService {
     const category = await this.categoryRepository.findOneBy({ id });
     if (!category) throw new NotFoundException(NotFoundMessage.notFound);
     return category;
+  }
+
+  async findOneByTitle(title: string) {
+    return this.categoryRepository.findOneBy({ title });
   }
 
   async remove(id: number) {
