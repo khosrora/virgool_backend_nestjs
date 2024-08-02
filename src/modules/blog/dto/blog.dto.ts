@@ -32,7 +32,7 @@ export class CreateBlogDto {
   categories: string[] | string;
 }
 
-export class UpdateBlogDto extends PartialType(CreateBlogDto) { }
+export class UpdateBlogDto extends PartialType(CreateBlogDto) {}
 
 export class FilterBlogDto {
   category: string;

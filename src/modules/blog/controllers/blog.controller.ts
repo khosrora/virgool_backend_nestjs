@@ -16,9 +16,9 @@ import { Pagination } from 'src/common/decorator/Pagination.decorator';
 import { skipAuth } from 'src/common/decorator/Skip-auth.decorator';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { swaggerConsumes } from 'src/common/enums/swagger-consume.enum';
-import { AuthGuard } from '../auth/guards/auth.guards';
-import { BlogService } from './blog.service';
-import { CreateBlogDto, FilterBlogDto, UpdateBlogDto } from './dto/blog.dto';
+import { AuthGuard } from '../../auth/guards/auth.guards';
+import { CreateBlogDto, FilterBlogDto, UpdateBlogDto } from './../dto/blog.dto';
+import { BlogService } from '../services/blog.service';
 
 @Controller('blog')
 @ApiTags('blogs')
@@ -74,5 +74,16 @@ export class BlogController {
   @ApiConsumes(swaggerConsumes.urlEncoded, swaggerConsumes.Json)
   bookmarkToggle(@Param('id', ParseIntPipe) id: number) {
     return this.blogService.bookmarkToggleBlog(id);
+  }
+
+  @Get('/blog/:slug')
+  @ApiConsumes(swaggerConsumes.urlEncoded, swaggerConsumes.Json)
+  @Pagination()
+  @skipAuth()
+  getBySlug(
+    @Param('slug') slug: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.blogService.findOne(slug, paginationDto);
   }
 }

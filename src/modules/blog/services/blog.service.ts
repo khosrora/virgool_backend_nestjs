@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -7,29 +8,28 @@ import {
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isArray } from 'class-validator';
 import { Request } from 'express';
-import { createSlug } from 'src/common/utils/function.utils';
-import { FindOptionsWhere, Repository } from 'typeorm';
-import {
-  BadRequestMessage,
-  NotFoundMessage,
-  PublicMessage,
-} from '../auth/enums/message.enum';
-import { CreateBlogDto, FilterBlogDto, UpdateBlogDto } from './dto/blog.dto';
-import { BlogEntity } from './entities/blog.entities';
-import { randomId } from 'src/common/utils/function.utils';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { EntityName } from 'src/common/enums/entity.enum';
+import { createSlug, randomId } from 'src/common/utils/function.utils';
 import {
   paginationGenerator,
   paginationSolver,
 } from 'src/common/utils/paginate.utils';
-import { isArray } from 'class-validator';
-import { CategoryEntity } from '../category/entities/category.entities';
-import { CategoryService } from '../category/category.service';
-import { BlogCategoryEntity } from './entities/category.entities';
-import { EntityName } from 'src/common/enums/entity.enum';
-import { BlogLikeEntity } from './entities/like.entities';
-import { BlogBookMarkEntity } from './entities/bookmark.entities';
+import { Repository } from 'typeorm';
+import {
+  BadRequestMessage,
+  NotFoundMessage,
+  PublicMessage,
+} from '../../auth/enums/message.enum';
+import { CategoryService } from '../../category/category.service';
+import { CreateBlogDto, FilterBlogDto, UpdateBlogDto } from '../dto/blog.dto';
+import { BlogEntity } from '../entities/blog.entities';
+import { BlogBookMarkEntity } from '../entities/bookmark.entities';
+import { BlogCategoryEntity } from '../entities/category.entities';
+import { BlogLikeEntity } from '../entities/like.entities';
+import { CommentService } from './comment.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogService {
@@ -43,6 +43,7 @@ export class BlogService {
     @InjectRepository(BlogBookMarkEntity)
     private blogBookmarkRepository: Repository<BlogBookMarkEntity>,
     private categoryService: CategoryService,
+    private commentService: CommentService,
     @Inject(REQUEST) private request: Request,
   ) {}
 
@@ -152,9 +153,6 @@ export class BlogService {
     const { limit, page, skip } = paginationSolver(paginationDto);
     let { category, search } = filterBlogDto;
 
-    if (search) {
-    }
-
     // let where: FindOptionsWhere<BlogEntity> = {};
     // if (category) {
     //   where['categories'] = {
@@ -192,6 +190,12 @@ export class BlogService {
       .where(where, { category, search })
       .loadRelationIdAndMap('blog.likes', 'blog.likes')
       .loadRelationIdAndMap('blog.bookmarks', 'blog.bookmarks')
+      .loadRelationIdAndMap(
+        'blog.comments',
+        'blog.comments',
+        'comments',
+        (qb) => qb.where('comments.accepted = :accepted', { accepted: true }),
+      )
       .orderBy('blog.id', 'DESC')
       .skip(skip)
       .take(limit)
@@ -221,6 +225,34 @@ export class BlogService {
     return {
       pagination: paginationGenerator(count, page, limit),
       blogs,
+    };
+  }
+
+  async findOne(slug: string, paginationDto: PaginationDto) {
+    const blog = await this.blogRepository
+      .createQueryBuilder(EntityName.Blog)
+      .leftJoinAndSelect('blog.categories', 'categories')
+      .leftJoinAndSelect('categories.category', 'category')
+      .leftJoinAndSelect('blog.author', 'author')
+      .leftJoinAndSelect('author.profile', 'profile')
+      .where('blog.slug = :slug', { slug })
+      .loadRelationCountAndMap('blog.likesCount', 'blog.likes')
+      .loadRelationCountAndMap('blog.bookmarksCount', 'blog.bookmarks')
+      // .loadRelationCountAndMap(
+      //   'blog.commentsCount',
+      //   'blog.comments',
+      //   'comments',
+      //   (qb) => qb.where('comments.accepted = :accepted', { accepted: true }),
+      // )
+      .getOne();
+
+    if (!blog) throw new NotFoundException(NotFoundMessage.notFound);
+    const commentsData = await this.commentService.commentsOfBlog(
+      blog.id,
+      paginationDto,
+    );
+    return {
+      commentsData,
     };
   }
 
