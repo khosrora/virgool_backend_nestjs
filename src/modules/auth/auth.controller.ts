@@ -14,6 +14,9 @@ import { swaggerConsumes } from 'src/common/enums/swagger-consume.enum';
 import { AuthService } from './auth.service';
 import { AuthDto, CheckOtpDto } from './dto/auth.dto';
 import { AuthGuard } from './guards/auth.guards';
+import { CanAccess } from 'src/common/decorator/role.decorator';
+import { Roles } from 'src/common/enums/roles.enum';
+import { AuthDecorator } from 'src/common/decorator/auth.decorator';
 
 @Controller()
 @ApiTags('auth')
@@ -33,8 +36,9 @@ export class AuthController {
   @Get('check-login')
   @ApiBearerAuth('Authorization')
   @UseGuards(AuthGuard)
+  @AuthDecorator()
+  @CanAccess(Roles.ADMIN)
   checkLogin(@Req() req: Request) {
-    console.log(req.user);
     return req.user;
   }
 }

@@ -8,6 +8,7 @@ import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { OtpEntity } from './otp.entities';
 import { ProfileEntity } from './profile.entities';
 import { ImageEntity } from 'src/modules/image/entities/image.entities';
+import { Roles } from 'src/common/enums/roles.enum';
 
 @Entity(EntityName.User)
 export class UserEntity extends BaseEntity {
@@ -40,6 +41,9 @@ export class UserEntity extends BaseEntity {
 
   @Column({ nullable: true })
   password: string;
+
+  @Column({ default: Roles.USER, nullable: true })
+  role: string;
 
   @Column({ nullable: true })
   otpId: number;
