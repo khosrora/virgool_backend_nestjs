@@ -6,22 +6,20 @@ import {
   ParseIntPipe,
   Post,
   Put,
-  Query,
-  UseGuards,
+  Query
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from 'src/modules/auth/guards/auth.guards';
-import { CommentService } from '../services/comment.service';
-import { CreateCommentDto } from '../dto/comment.dto';
-import { swaggerConsumes } from 'src/common/enums/swagger-consume.enum';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Pagination } from 'src/common/decorator/Pagination.decorator';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { skipAuth } from 'src/common/decorator/Skip-auth.decorator';
+import { AuthDecorator } from 'src/common/decorator/auth.decorator';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { swaggerConsumes } from 'src/common/enums/swagger-consume.enum';
+import { CreateCommentDto } from '../dto/comment.dto';
+import { CommentService } from '../services/comment.service';
 
 @Controller('blog/comment')
 @ApiTags('blogs/comments')
-@ApiBearerAuth('Authorization')
-@UseGuards(AuthGuard)
+@AuthDecorator()
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 

@@ -229,6 +229,7 @@ export class BlogService {
   }
 
   async findOne(slug: string, paginationDto: PaginationDto) {
+    const userId = this.request?.user?.id;
     const blog = await this.blogRepository
       .createQueryBuilder(EntityName.Blog)
       .leftJoinAndSelect('blog.categories', 'categories')
@@ -245,14 +246,31 @@ export class BlogService {
       //   (qb) => qb.where('comments.accepted = :accepted', { accepted: true }),
       // )
       .getOne();
-
     if (!blog) throw new NotFoundException(NotFoundMessage.notFound);
+
+    let isLiked = false;
+    let isBookmarked = false;
+
+    if (userId && !isNaN(userId) && userId > 0) {
+      isLiked = !!(await this.blogLikeRepository.findOneBy({
+        userId,
+        blogId: blog.id,
+      }));
+
+      isBookmarked = !!(await this.blogBookmarkRepository.findOneBy({
+        userId,
+        blogId: blog.id,
+      }));
+    }
+
     const commentsData = await this.commentService.commentsOfBlog(
       blog.id,
       paginationDto,
     );
     return {
       commentsData,
+      isLiked,
+      isBookmarked,
     };
   }
 

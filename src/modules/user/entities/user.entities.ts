@@ -7,6 +7,7 @@ import { BlogLikeEntity } from 'src/modules/blog/entities/like.entities';
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { OtpEntity } from './otp.entities';
 import { ProfileEntity } from './profile.entities';
+import { ImageEntity } from 'src/modules/image/entities/image.entities';
 
 @Entity(EntityName.User)
 export class UserEntity extends BaseEntity {
@@ -58,4 +59,7 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => BlogCommentEntity, (comment) => comment.user)
   blog_comments: BlogCommentEntity[];
+
+  @OneToMany(() => ImageEntity, (image) => image.user)
+  images: ImageEntity[];
 }

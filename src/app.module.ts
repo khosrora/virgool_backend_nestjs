@@ -8,6 +8,7 @@ import { TypeormConfig } from './config/typeorm.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { BlogModule } from './modules/blog/blog.module';
 import { CategoryModule } from './modules/category/category.module';
+import { ImageModule } from './modules/image/image.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -21,6 +22,7 @@ import { UserModule } from './modules/user/user.module';
     UserModule,
     CategoryModule,
     BlogModule,
+    ImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
