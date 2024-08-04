@@ -17,7 +17,7 @@ import {
   paginationGenerator,
   paginationSolver,
 } from 'src/common/utils/paginate.utils';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import {
   BadRequestMessage,
   NotFoundMessage,
@@ -45,6 +45,7 @@ export class BlogService {
     private categoryService: CategoryService,
     private commentService: CommentService,
     @Inject(REQUEST) private request: Request,
+    private dataSource: DataSource,
   ) {}
 
   async create(blogDto: CreateBlogDto) {
@@ -267,8 +268,22 @@ export class BlogService {
       blog.id,
       paginationDto,
     );
+
+    const queryRunner = await this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    const suggestBlog = await queryRunner.query(`
+          WITH suggested_blogs AS (
+              SELECT b.*
+              FROM blog b 
+              ORDER BY RANDOM()
+              LIMIT 3
+          ) 
+          SELECT * FROM suggested_blogs    
+    `);
+
     return {
       commentsData,
+      suggestBlog,
       isLiked,
       isBookmarked,
     };
