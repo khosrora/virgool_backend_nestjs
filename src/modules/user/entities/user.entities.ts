@@ -9,6 +9,7 @@ import { OtpEntity } from './otp.entities';
 import { ProfileEntity } from './profile.entities';
 import { ImageEntity } from 'src/modules/image/entities/image.entities';
 import { Roles } from 'src/common/enums/roles.enum';
+import { FollowEntity } from './follow.entities';
 
 @Entity(EntityName.User)
 export class UserEntity extends BaseEntity {
@@ -66,4 +67,10 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => ImageEntity, (image) => image.user)
   images: ImageEntity[];
+
+  @OneToMany(() => FollowEntity, (follow) => follow.followers)
+  following: FollowEntity[];
+
+  @OneToMany(() => FollowEntity, (follow) => follow.following)
+  followers: FollowEntity[];
 }

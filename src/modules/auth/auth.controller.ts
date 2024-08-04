@@ -37,7 +37,7 @@ export class AuthController {
   @ApiBearerAuth('Authorization')
   @UseGuards(AuthGuard)
   @AuthDecorator()
-  @CanAccess(Roles.ADMIN)
+  @CanAccess(Roles.USER)
   checkLogin(@Req() req: Request) {
     return req.user;
   }

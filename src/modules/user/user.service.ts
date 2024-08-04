@@ -3,6 +3,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -25,6 +26,8 @@ import { ProfileEntity } from './entities/profile.entities';
 import { UserEntity } from './entities/user.entities';
 import { Gender } from './enum/gender.enum';
 import { ProfileImages } from './types/files';
+import { FollowEntity } from './entities/follow.entities';
+import { EntityName } from 'src/common/enums/entity.enum';
 
 @Injectable()
 export class UserService {
@@ -34,6 +37,8 @@ export class UserService {
     private profileRepositry: Repository<ProfileEntity>,
     @InjectRepository(OtpEntity)
     private otpRepositry: Repository<OtpEntity>,
+    @InjectRepository(FollowEntity)
+    private followRepositry: Repository<FollowEntity>,
     @Inject(REQUEST) private request: Request,
     private authServise: AuthService,
     private tokenService: TokenService,
@@ -93,10 +98,31 @@ export class UserService {
 
   async profile() {
     const { id } = this.request.user;
-    return this.userRepositry.findOne({
-      where: { id },
-      relations: ['profile'],
+    return this.userRepositry
+      .createQueryBuilder(EntityName.User)
+      .where({ id })
+      .leftJoinAndSelect('user.profile', 'profile')
+      .loadRelationCountAndMap('user.followers', 'user.followers')
+      .loadRelationCountAndMap('user.following', 'user.following')
+      .getOne();
+  }
+
+  async followToggle(followingId: number) {
+    const { id: userId } = this.request.user;
+    const following = this.userRepositry.findOneBy({ id: followingId });
+    if (!following) throw new NotFoundException();
+    const isFollowing = await this.followRepositry.findOneBy({
+      followingId,
+      followerId: userId,
     });
+    if (isFollowing) {
+      await this.followRepositry.remove(isFollowing);
+    } else {
+      await this.followRepositry.insert({ followingId, followerId: userId });
+    }
+    return {
+      message: PublicMessage.updated,
+    };
   }
 
   async changeEmail(email: string) {

@@ -27,6 +27,8 @@ import { AuthMethod } from './enums/method.enum';
 import { AuthType } from './enums/type.enum';
 import { TokenService } from './token.service';
 import { AuthResponse } from './types/response.types';
+import { googleAuth } from './types/google.types';
+import { randomId } from 'src/common/utils/function.utils';
 
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
@@ -90,6 +92,33 @@ export class AuthService {
       token,
       code: otp.code,
     };
+  }
+
+  async googleAuth(userData: googleAuth) {
+    const { emails, firstName, lastName } = userData;
+    let user = await this.userRepository.findOneBy({ email: emails });
+    let token: string;
+    if (user) {
+      token = await this.tokenService.createAccessToken({
+        userId: user.id,
+      });
+    } else {
+      user = this.userRepository.create({
+        email: emails,
+        verify_email: true,
+        username: emails.split('@')['0'] + randomId(),
+      });
+      await this.userRepository.save(user);
+      let profile = this.profileRepository.create({
+        userId: user.id,
+        nick_name: `${firstName}_${randomId()}`,
+      });
+      profile = await this.profileRepository.save(profile);
+      user.profileId = profile.id;
+      await this.userRepository.save(user);
+      token = this.tokenService.createAccessToken({ userId: user.id });
+    }
+    return { token };
   }
 
   async checkOtp_service(code: string) {

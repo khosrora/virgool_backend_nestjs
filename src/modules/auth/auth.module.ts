@@ -7,11 +7,13 @@ import { UserEntity } from '../user/entities/user.entities';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
+import { GoogleAuthController } from './google.controller';
+import { GoogleStrategy } from './strategy/google.strategy';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity, OtpEntity, ProfileEntity])],
-  controllers: [AuthController],
-  providers: [AuthService, JwtService, TokenService],
+  controllers: [AuthController, GoogleAuthController],
+  providers: [AuthService, JwtService, TokenService, GoogleStrategy],
   exports: [AuthService, JwtService, TokenService, TypeOrmModule],
 })
 export class AuthModule {}

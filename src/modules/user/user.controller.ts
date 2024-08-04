@@ -1,24 +1,24 @@
 import {
   Body,
   Controller,
-  Get, Patch,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
   Post,
   Put,
-  Res, UseGuards,
-  UseInterceptors
+  Res,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import {
-  FileFieldsInterceptor
-} from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { UploadFileOptional } from 'src/common/decorator/UploadFile.decorator';
 import { CookieKeys } from 'src/common/enums/cookie.enum';
 import { swaggerConsumes } from 'src/common/enums/swagger-consume.enum';
 import { CookieOptionToken } from 'src/common/utils/cookie.utils';
-import {
-  multerStorage
-} from 'src/common/utils/multer.utils';
+import { multerStorage } from 'src/common/utils/multer.utils';
 import { PublicMessage } from '../auth/enums/message.enum';
 import { AuthGuard } from '../auth/guards/auth.guards';
 import {
@@ -26,7 +26,7 @@ import {
   ChangePhoneDto,
   ChangeUsernameDto,
   ProfileDto,
-  VerifyCodeDto
+  VerifyCodeDto,
 } from './dto/profile.dto';
 import { ProfileImages } from './types/files';
 import { UserService } from './user.service';
@@ -64,6 +64,14 @@ export class UserController {
   @UseGuards(AuthGuard)
   profile() {
     return this.userService.profile();
+  }
+
+  @Get('/followToggle/:followingId')
+  @ApiParam({ name: 'followingId' })
+  @ApiBearerAuth('Authorization')
+  @UseGuards(AuthGuard)
+  follow(@Param('followingId', ParseIntPipe) followingId: number) {
+    return this.userService.followToggle(followingId);
   }
 
   @Patch('/change-email')
@@ -119,12 +127,12 @@ export class UserController {
   verifyPhone(@Body() otpDto: VerifyCodeDto) {
     return this.userService.verifyPhone(otpDto.code);
   }
-  
+
   @Patch('change-username')
   @ApiBearerAuth('Authorization')
   @ApiConsumes(swaggerConsumes.urlEncoded)
   @UseGuards(AuthGuard)
   changeUsername(@Body() changeUsernameDto: ChangeUsernameDto) {
-    return this.userService.changeUsername(changeUsernameDto.username)
+    return this.userService.changeUsername(changeUsernameDto.username);
   }
 }
