@@ -15,11 +15,15 @@ import { FollowEntity } from './follow.entities';
 export class UserEntity extends BaseEntity {
   @Column({ nullable: true })
   profileId: number;
+
   @OneToOne(() => ProfileEntity, (profile) => profile.user, { nullable: true })
   @JoinColumn()
   profile: ProfileEntity;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ nullable: true, type: 'numeric', default: 0 })
+  balance: number;
+
+  @Column({ unique: true, nullable: false })
   username: string;
 
   @Column({ unique: true, nullable: true })
